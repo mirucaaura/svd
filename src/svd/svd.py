@@ -48,7 +48,7 @@ class SVD:
         return <grad f(U, V), (xi, eta)>_(U, V)
         """
         gradF_x, gradF_y = self.gradF(U, V)
-        return np.trace(U.T @ xi) + np.trace(V.T @ eta)
+        return np.trace(gradF_x.T @ xi) + np.trace(gradF_y.T @ eta)
 
     def vector_transport(self, zeta, chi, xi, eta, U, V):
         return (zeta - self.qf(U + xi) @ self.Sym(self.qf(U + xi).T @ zeta),
