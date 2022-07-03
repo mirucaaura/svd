@@ -44,8 +44,19 @@ class SVD:
                 V @ self.Sym(V.T @ self.A.T @ U @ self.N) - self.A.T @ U @ self.N)
 
     def inner_product_at_UV(self, U, V, xi, eta):
-        """
-        return <grad f(U, V), (xi, eta)>_(U, V)
+        """Calculation of inner product.
+
+        Calculation the value of <grad f(U, V), (xi, eta)>_(U, V),
+        where (U, V) and (xi, eta) are a current point and a search direction, respectively. 
+
+        Args:
+            U (numpy.ndarray): The current point
+            V (numpy.ndarray): The current point
+            xi (numpy.ndarray): The descent vector
+            eta (numpy.ndarray): The descent vector
+
+        Returns:
+            numpy.ndarray: <grad f(U, V), (xi, eta)>_(U, V)
         """
         gradF_x, gradF_y = self.gradF(U, V)
         return np.trace(gradF_x.T @ xi) + np.trace(gradF_y.T @ eta)
