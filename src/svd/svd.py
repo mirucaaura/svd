@@ -15,33 +15,64 @@ class SVD:
     itemax: int = 300
     eps: float = 1e-9
 
+
     def F(self, U, V):
         return -np.trace(U.T @ self.A @ V @ self.N)
+
 
     def F_opt(self, S, N):
         p = N.shape[0]
         S = S[:p, :p]
         return -np.trace(S @ N)
     
+
     def Sym(self, X):
         return (X + X.T) / 2
+
 
     def qf(self, X):
         Q, _ = np.linalg.qr(X)
         return Q
 
+
     def calc_xi(self, U, V):
         return self.A @ V @ self.N - U @ self.Sym(U.T @ self.A @ V @ self.N)
+
 
     def calc_eta(self, U, V):
         return self.A.T @ U @ self.N - V @ self.Sym(V.T @ self.A.T @ U @ self.N)
     
+
     def R(self, xi, eta, U, V):
+        """Returns the value of retraction at (U, V)
+
+        Args:
+            xi (numpy.ndarray): The point on the tangent space at (U, V)
+            eta (numpy.ndarray): The point on the tangent space at (U, V)
+            U (numpy.ndarray): The current point
+            V (numpy.ndarray): The current point
+
+        Returns:
+            A retraction R on St(p, m) * St(p, n) at (U, V).
+        """
         return (self.qf(U + xi), self.qf(V + eta))
 
+
     def gradF(self, U, V):
+        """Calculation of gradient of F.
+
+        Calculation the value of gradient of F at (U, V).
+
+        Args:
+            U (numpy.ndarray): The current point
+            V (numpy.ndarray): The current point
+
+        Returns:
+            numpy.ndarray: grad of F at (U, V)
+        """
         return (U @ self.Sym(U.T @ self.A @ V @ self.N) - self.A @ V @ self.N,
                 V @ self.Sym(V.T @ self.A.T @ U @ self.N) - self.A.T @ U @ self.N)
+
 
     def inner_product_at_UV(self, U, V, xi, eta):
         """Calculation of inner product.
@@ -61,19 +92,23 @@ class SVD:
         gradF_x, gradF_y = self.gradF(U, V)
         return np.trace(gradF_x.T @ xi) + np.trace(gradF_y.T @ eta)
 
+
     def vector_transport(self, zeta, chi, xi, eta, U, V):
         return (zeta - self.qf(U + xi) @ self.Sym(self.qf(U + xi).T @ zeta),
                 chi - self.qf(V + eta) @ self.Sym(self.qf(V + eta).T @ chi))
 
+
     def norm_grad(self, U, V):
         gradF_x, gradF_y = self.gradF(U, V)
         return np.trace(gradF_x.T @ gradF_x) + np.trace(gradF_y.T @ gradF_y)
+
 
     def armijo_rule(self, U, V, xi, eta, c):
         R_xi, R_eta = self.R(c * xi, c * eta, U, V)
         left = self.F(U, V) - self.F(R_xi, R_eta)
         right = -self.sigma * self.inner_product_at_UV(U, V, c * xi, c * eta)
         return left >= right
+
 
     def wolfe_rule(self, U, V, xi, eta, c):
         R_xi, R_eta = self.R(c * xi, c * eta, U, V)
@@ -82,7 +117,19 @@ class SVD:
         right = self.rho * self.inner_product_at_UV(U, V, xi, eta)
         return left >= right
 
+
     def backtrack(self, U, V, xi, eta):
+        """A backtraking algorithm.
+        
+        Args:
+            U (numpy.ndarray): The current point
+            V (numpy.ndarray): The current point
+            xi (numpy.ndarray): The descent vector
+            eta (numpy.ndarray): The descent vector
+
+        Returns:
+            c (float): The stepsize satisfying wolfe rule.
+        """
         m = 1
         c = pow(self.beta, m) * self.alpha
         while self.armijo_rule(U, V, xi, eta, c) == False or self.wolfe_rule(U, V, xi, eta, c) == False:
@@ -92,12 +139,25 @@ class SVD:
                 break
         return c
 
+
     def save_F(self, data, filename):
         path = os.path.dirname(__file__) + filename
         with open(path, 'a') as f:
             np.savetxt(data)
 
+
     def steepest_descent(self, U0, V0, verbose=False):
+        """Riemannian steepest desent algorithm.
+
+        Args:
+            U0 (numpy.ndarray): An initial guess of the problem to be solved.
+            V0 (numpy.ndarray): An initial guess of the problem to be solved.
+            verbose (bool): A log level.
+
+        Returns:
+            Uk (numpy.ndarray): The optimal solution.
+            Vk (numpy.ndarray): The optimal solution.
+        """
         Uk = U0
         Vk = V0
         for i in range(self.itemax):
@@ -112,13 +172,25 @@ class SVD:
             if verbose:
                 if i % (self.itemax // 10) == 0:
                     print(i, ':\t', self.norm_grad(xik, etak), self.F(U_next, V_next))
+            # stopping_criterion
             if self.norm_grad(xik, etak) < self.eps:
                 break
             Uk = U_next
             Vk = V_next
         return Uk, Vk
 
+
     def cg(self, U0, V0, verbose=False):
+        """
+        Args:
+            U0 (numpy.ndarray): An initial guess of the problem to be solved.
+            V0 (numpy.ndarray): An initial guess of the problem to be solved.
+            verbose (bool): A log level.
+
+        Returns:
+            Uk (numpy.ndarray): The optimal solution.
+            Vk (numpy.ndarray): The optimal solution.
+        """
         xik = self.calc_xi(U0, V0)
         etak = self.calc_eta(U0, V0)
         bar_xik = -xik
@@ -145,6 +217,7 @@ class SVD:
             if verbose:
                 if i % (self.itemax // 10) == 0:
                     print(i, ':\t', self.norm_grad(xik_next, etak_next), self.F(U_next, V_next))
+            # stopping_criterion
             if self.norm_grad(xik_next, etak_next) < self.eps:
                 break
             # set
