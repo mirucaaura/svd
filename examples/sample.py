@@ -3,7 +3,7 @@ from svd.svd import SVD
 import matplotlib.pyplot as plt
 
 np.random.seed(20220630)
-m, n, p = 5, 4, 3
+m, n, p = 8, 6, 3
 mu = np.arange(p, 0, -1)
 N = np.diag(mu)
 
