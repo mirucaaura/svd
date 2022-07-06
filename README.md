@@ -2,17 +2,21 @@
 
 This repository provides `python` implementation of a Riemannian Optimization approach to the matrix singular value decomposition. `svd` enables us to solve the following optimization problem:
 
+$$
 \begin{align}
 \max_{U,V}\quad& \mathrm{tr}(U^\top AVN)\\
 \text{subject to}\quad& U\in\mathbb{R}^{m\times p},\,V\in\mathbb{R}^{n\times p},\,U^\top U = V^\top V = I_p.
 \end{align}
+$$
 
 This constrained optimization problem turned out to be the following unconstrained optimization on riemannian manifold:
 
+$$
 \begin{align}
 \max_{U,V}\quad& \mathrm{tr}(U^\top AVN)\\
 \text{subject to}\quad& (U,V) \in \mathrm{St}(p,m) \times \mathrm{St}(p,n).
 \end{align}
+$$
 
 ## Instrallation
 
