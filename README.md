@@ -18,7 +18,7 @@ $$
 \end{align}
 $$
 
-where $\mathrm{St}(p,n):= \left\{Y \in \mathbb{R}^{n \times p} \mid Y^\top Y = I_p \right\}$ is referred to as a Stiefel manifold.
+where $\mathrm{St}(p,n):= \left\\{Y \in \mathbb{R}^{n \times p} \mid Y^\top Y = I_p \right\\}$ is referred to as a Stiefel manifold.
 
 ## Instrallation
 
