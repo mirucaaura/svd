@@ -71,8 +71,6 @@ class SVD:
             numpy.ndarray: grad of F at (U, V)
         """
         return (-self.calc_xi(U, V), -self.calc_eta(U, V))
-        # return (U @ self.Sym(U.T @ self.A @ V @ self.N) - self.A @ V @ self.N,
-        #         V @ self.Sym(V.T @ self.A.T @ U @ self.N) - self.A.T @ U @ self.N)
 
 
     def inner_product_at_UV(self, U, V, xi, eta):
@@ -99,19 +97,6 @@ class SVD:
                 chi - self.qf(V + eta) @ self.Sym(self.qf(V + eta).T @ chi))
     
 
-    # def vector_transport_R(self, zeta, chi, xi, eta, U, V, rho_skew):
-    #     m, n = self.A.shape
-    #     Q1 = self.qf(U + xi)
-    #     Q2 = self.qf(V + eta)
-    #     a = np.linalg.inv(Q1 @ (U + xi))
-    #     b = np.linalg.inv(Q2 @ (V + eta))
-    #     return (Q1 @ rho_skew @)
-
-
-    # def beta_polak_ribiere(self, xi, eta, zeta, chi):
-    #     return (np.trace(xi.T @ (xi - zeta)) + np.trace(eta.T @ (eta - chi))) / (np.trace(xi.T @ xi) + np.trace(eta.T @ eta))
-
-
     def norm_grad(self, U, V):
         gradF_x, gradF_y = self.gradF(U, V)
         return np.sqrt(np.trace(gradF_x.T @ gradF_x) + np.trace(gradF_y.T @ gradF_y))
@@ -121,14 +106,12 @@ class SVD:
         R_xi, R_eta = self.R(c * xi, c * eta, U, V)
         left = self.F(U, V) - self.F(R_xi, R_eta)
         right = -self.sigma * self.inner_product_at_UV(U, V, c * xi, c * eta)
-        # print(left, "\t", right, "\t", c)
         return left >= right
 
 
     def wolfe_rule(self, U, V, xi, eta, c):
         R_xi, R_eta = self.R(c * xi, c * eta, U, V)
         a, b = self.vector_transport_P(R_xi, R_eta, xi, eta, U, V)
-        # left = c * self.inner_product_at_UV(R_xi, R_eta, a, b)
         left = self.inner_product_at_UV(R_xi, R_eta, a, b)
         right = self.rho * self.inner_product_at_UV(U, V, xi, eta)
         return left >= right
@@ -148,8 +131,7 @@ class SVD:
         """
         m = 1
         c = pow(self.beta, m) * self.alpha
-        # while self.armijo_rule(U, V, xi, eta, c) == False or self.wolfe_rule(U, V, xi, eta, c) == False:
-        while self.armijo_rule(U, V, xi, eta, c) == False:
+        while self.armijo_rule(U, V, xi, eta, c) == False or self.wolfe_rule(U, V, xi, eta, c) == False:
             m += 1
             c = pow(self.beta, m) * self.alpha
             if c < 1e-7:
@@ -217,7 +199,7 @@ class SVD:
         for i in range(self.itemax):
             # 4. compute stepsize
             tk = self.backtrack(Uk, Vk, xik, etak)
-            # print(i, ":\t", tk)
+            print(i, ":\t", tk)
             # 4. set
             U_next = self.qf(Uk + tk * xik)
             V_next = self.qf(Vk + tk * etak)
@@ -225,11 +207,7 @@ class SVD:
             zeta = bar_xik  - self.qf(Uk + tk * xik)  @ self.Sym(self.qf(Uk + tk * xik).T  @ bar_xik)
             chi  = bar_etak - self.qf(Vk + tk * etak) @ self.Sym(self.qf(Vk + tk * etak).T @ bar_etak)
             # 5. compute bar_xik_next, bar_etak_next
-            # bar_xik_next = self.gradF(U_next, V_next)[0]
-            # bar_etak_next = self.gradF(U_next, V_next)[1]
             bar_xik_next, bar_etak_next = self.gradF(U_next, V_next)
-            # bar_xik_next = U_next @ self.Sym(U_next.T @ self.A @ V_next @ self.N) - self.A @ V_next @ self.N
-            # bar_etak_next = V_next @ self.Sym(V_next.T @ self.A.T @ U_next @ self.N) - self.A.T @ U_next @ self.N
             # 6. compute beta
             beta = np.trace(bar_xik_next.T @ (bar_xik_next - zeta)) + np.trace(bar_etak_next.T @ (bar_etak_next - chi)) / (np.trace(bar_xik.T @ bar_xik) + np.trace(bar_etak.T @ bar_etak))
             # 7. set
