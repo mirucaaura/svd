@@ -14,9 +14,11 @@ This constrained optimization problem turned out to be the following unconstrain
 $$
 \begin{align}
 \max_{U,V}\quad& \mathrm{tr}(U^\top AVN)\\
-\text{subject to}\quad& (U,V) \in \mathrm{St}(p,m) \times \mathrm{St}(p,n).
+\text{subject to}\quad& (U,V) \in \mathrm{St}(p,m) \times \mathrm{St}(p,n),
 \end{align}
 $$
+
+where $\mathrm{St}(p,n):= \left\{Y \in \mathbb{R}^{n \times p} \mid Y^\top Y = I_p \right\}$ is referred to as a Stiefel manifold.
 
 ## Instrallation
 
