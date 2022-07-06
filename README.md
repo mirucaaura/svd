@@ -22,14 +22,14 @@ python ./example/sample.py
 
 First, import packages:
 
-```python=
+```python
 import numpy as np
 from svd import SVD
 ```
 
 Define problem as:
 
-```python=
+```python
 np.random.seed(20220630)
 m, n, p = 5, 4, 3
 
@@ -44,24 +44,26 @@ N = np.diag(mu)
 
 Initial point which is on $\mathrm{St}(p,m) \times \mathrm{St}(p,n)$ is needed. Here, we generate initial point as follows:
 
-```python=
+```python
 U0 = np.eye(m, p)
 V0 = np.eye(n, p)
 ```
 
 Then, you can run optimization algorithm. You can choose steepest descent method and conjugate gradient method. Here, we give an example to use steepest descent method. The approximated optimal solution is returned.
 
-```python=
+```python
 svd = SVD(A, N)
 U_star, V_star = svd.steepest_descent(U0, V0, verbose=True)
 ```
 
 In this case, we can verify the quality of the obtained solution as follows:
 
-```python=
+```python
 print('Optimal value obtained by steepst descent: {}'.format(svd.F(U_star, V_star)))
 print('Optimal value: {}'.format(svd.F_opt(S, N)))
 ```
+
+The output is as follows:
 
 ```
 Optimal value obtained by steepst descent: -20.00000000000001
